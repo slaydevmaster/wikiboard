@@ -1,0 +1,36 @@
+# 의존성
+node_modules/
+
+# 빌드 결과물
+dist/
+build/
+.cache/
+
+# 임시 파일
+.tmp/
+
+# 환경변수 (비밀 정보 포함)
+.env
+
+# 로그
+*.log
+npm-debug.log*
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# IDE 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Strapi 생성 타입
+types/generated/
+
+# 업로드 파일 (로컬 개발용)
+public/uploads/
+
+# 라이선스 파일 (Strapi 자동 생성)
+license

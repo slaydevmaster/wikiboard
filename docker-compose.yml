@@ -1,0 +1,3 @@
+# 프로덕션용 (추후 구성)
+# v0에서는 docker-compose.dev.yml 사용
+services: {}

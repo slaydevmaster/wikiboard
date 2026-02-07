@@ -1,0 +1,24 @@
+{
+  "name": "wikiboard",
+  "private": true,
+  "description": "사전형 위키보드 플랫폼",
+  "scripts": {
+    "dev:web": "dotenv -e .env -- npm -w apps/web run dev",
+    "dev:cms": "dotenv -e .env -- npm -w apps/cms run develop",
+    "build:web": "dotenv -e .env -- npm -w apps/web run build",
+    "build:cms": "dotenv -e .env -- npm -w apps/cms run build",
+    "lint": "npm -w apps/web run lint",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up -d",
+    "docker:down": "docker compose -f docker-compose.dev.yml down"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0"
+  }
+}

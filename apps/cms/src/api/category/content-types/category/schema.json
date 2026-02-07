@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "categories",
+  "info": {
+    "singularName": "category",
+    "pluralName": "categories",
+    "displayName": "카테고리",
+    "description": "콘텐츠 분류를 위한 카테고리"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255,
+      "unique": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "terms": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::term.term",
+      "mappedBy": "category"
+    },
+    "articles": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::article.article",
+      "mappedBy": "category"
+    },
+    "downloads": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::download.download",
+      "mappedBy": "category"
+    }
+  }
+}

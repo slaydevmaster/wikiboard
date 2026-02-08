@@ -44,6 +44,7 @@ docker/data/
 
 # Claude Code
 .claude/
+CLAUDE.md
 
 # 기타
 *.tsbuildinfo

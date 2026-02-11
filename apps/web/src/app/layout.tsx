@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
+import { AuthProvider } from "@/components/auth/session-provider";
+import { UserMenu } from "@/components/auth/user-menu";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,44 +18,42 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="min-h-screen bg-white text-gray-900 antialiased">
-        {/* 공통 헤더 */}
-        <header className="border-b border-gray-200 bg-white">
-          <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-            <a href="/" className="text-xl font-bold text-brand-700">
-              WikiBoard
-            </a>
-            <div className="flex items-center gap-4">
-              <a
-                href="/terms"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                용어 목록
+        <Toaster position="top-right" richColors />
+        <AuthProvider>
+          {/* 공통 헤더 */}
+          <header className="border-b border-gray-200 bg-white">
+            <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+              <a href="/" className="text-xl font-bold text-brand-700">
+                WikiBoard
               </a>
-              <a
-                href="/search"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                검색
-              </a>
-              <a
-                href="/admin"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                관리
-              </a>
+              <div className="flex items-center gap-4">
+                <a
+                  href="/terms"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  용어 목록
+                </a>
+                <a
+                  href="/search"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  검색
+                </a>
+                <UserMenu />
+              </div>
+            </nav>
+          </header>
+
+          {/* 메인 콘텐츠 */}
+          <main>{children}</main>
+
+          {/* 공통 푸터 */}
+          <footer className="border-t border-gray-200 bg-gray-50">
+            <div className="mx-auto max-w-7xl px-4 py-6 text-center text-sm text-gray-500">
+              &copy; {new Date().getFullYear()} WikiBoard. 모든 권리 보유.
             </div>
-          </nav>
-        </header>
-
-        {/* 메인 콘텐츠 */}
-        <main>{children}</main>
-
-        {/* 공통 푸터 */}
-        <footer className="border-t border-gray-200 bg-gray-50">
-          <div className="mx-auto max-w-7xl px-4 py-6 text-center text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} WikiBoard. 모든 권리 보유.
-          </div>
-        </footer>
+          </footer>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,9 +1,28 @@
 /**
  * 메인 페이지
  * - 위키보드 타이틀 + 검색바 UI
- * - 최근 등록 용어, 인기 용어 등은 추후 추가
+ * - Strapi 연동으로 최근 등록 용어 표시
  */
-export default function HomePage() {
+
+import { getRecentTerms, type StrapiItem } from "@/lib/strapi";
+
+interface Term {
+  title: string;
+  slug: string;
+  one_liner: string | null;
+  publishedAt: string | null;
+}
+
+export default async function HomePage() {
+  // 최근 등록 용어 조회
+  let recentTerms: StrapiItem<Term>[] = [];
+
+  try {
+    const response = await getRecentTerms(5);
+    recentTerms = response.data || [];
+  } catch (error) {
+    console.error("최근 용어 조회 실패:", error);
+  }
   return (
     <div className="flex flex-col items-center justify-center px-4 py-20">
       {/* 타이틀 영역 */}
@@ -47,14 +66,48 @@ export default function HomePage() {
         </a>
       </div>
 
-      {/* 최근 등록 용어 (추후 Strapi 연동) */}
+      {/* 최근 등록 용어 */}
       <section className="mt-16 w-full max-w-3xl">
         <h2 className="mb-4 text-lg font-semibold text-gray-800">
           최근 등록된 용어
         </h2>
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-400">
-          Strapi 연동 후 최근 발행된 용어가 표시됩니다.
-        </div>
+
+        {recentTerms.length === 0 && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-400">
+            아직 등록된 용어가 없습니다.
+          </div>
+        )}
+
+        {recentTerms.length > 0 && (
+          <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200">
+            {recentTerms.map((term) => (
+              <li key={term.id} className="p-4 transition-colors hover:bg-gray-50">
+                <a href={`/terms/${term.attributes.slug}`} className="block">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h3 className="mb-1 text-base font-semibold text-gray-900">
+                        {term.attributes.title}
+                      </h3>
+                      {term.attributes.one_liner && (
+                        <p className="text-sm text-gray-600">
+                          {term.attributes.one_liner}
+                        </p>
+                      )}
+                    </div>
+                    {term.attributes.publishedAt && (
+                      <span className="text-xs text-gray-400">
+                        {new Date(term.attributes.publishedAt).toLocaleDateString("ko-KR", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

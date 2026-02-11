@@ -1,131 +1,177 @@
 /**
  * 용어 상세 페이지
- * - 동적 라우트: /terms/[slug]
- * - Strapi에서 slug 기반으로 용어 조회
+ * - Strapi에서 slug로 용어 조회
+ * - Markdown 본문 렌더링
  */
 
 import type { Metadata } from "next";
-// import { getTermBySlug } from "@/lib/strapi";
 import { notFound } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { getTermBySlug, type StrapiItem } from "@/lib/strapi";
 
-/** 동적 메타데이터 생성 */
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-
-  // TODO: Strapi 연동 후 실제 데이터로 메타데이터 생성
-  // const response = await getTermBySlug(slug);
-  // const term = response.data[0];
-
-  return {
-    title: `${slug} - WikiBoard`,
-    description: `${slug} 용어에 대한 상세 설명`,
-  };
+interface Term {
+  title: string;
+  slug: string;
+  one_liner: string | null;
+  summary: string | null;
+  body: string | null;
+  aliases: string | null;
+  publishedAt: string | null;
 }
 
-export default async function TermDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+interface PageProps {
+  params: Promise<{
+    slug: string;
+  }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  // TODO: Strapi API 연동
-  // const response = await getTermBySlug(slug);
-  // const term = response.data[0];
-  // if (!term) notFound();
+  try {
+    const response = await getTermBySlug(slug);
+    const term: StrapiItem<Term> | null = response.data?.[0] || null;
 
-  // 플레이스홀더 데이터 (Strapi 연동 전)
-  const term = {
-    title: slug,
-    oneLiner: "용어에 대한 한줄 설명이 여기에 표시됩니다.",
-    summary: "용어 요약이 여기에 표시됩니다.",
-    body: "용어에 대한 상세 설명(본문)이 여기에 표시됩니다. Strapi CMS 연동 후 실제 콘텐츠로 대체됩니다.",
-    category: "미분류",
-    tags: ["예시태그"],
-    aliases: [],
-    updatedAt: new Date().toISOString(),
-  };
+    if (!term) {
+      return {
+        title: "용어를 찾을 수 없습니다 - WikiBoard",
+      };
+    }
+
+    return {
+      title: `${term.attributes.title} - WikiBoard`,
+      description: term.attributes.one_liner || term.attributes.summary || undefined,
+    };
+  } catch {
+    return {
+      title: "용어를 찾을 수 없습니다 - WikiBoard",
+    };
+  }
+}
+
+export default async function TermDetailPage({ params }: PageProps) {
+  const { slug } = await params;
+
+  let term: StrapiItem<Term> | null = null;
+
+  try {
+    const response = await getTermBySlug(slug);
+    term = response.data?.[0] || null;
+  } catch (error) {
+    console.error("용어 조회 실패:", error);
+  }
+
+  if (!term) {
+    notFound();
+  }
+
+  const { title, one_liner, summary, body, aliases, publishedAt } = term.attributes;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      {/* 브레드크럼 */}
-      <nav className="mb-6 text-sm text-gray-500">
-        <a href="/" className="hover:text-gray-700">
-          홈
-        </a>
-        <span className="mx-2">/</span>
-        <a href="/terms" className="hover:text-gray-700">
-          용어 목록
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">{term.title}</span>
-      </nav>
+    <article>
+      {/* 상단 헤더 */}
+      <header className="mb-8 border-b border-gray-200 pb-6">
+        <h1 className="mb-2 text-3xl font-bold text-gray-900">{title}</h1>
 
-      {/* 용어 헤더 */}
-      <header className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">{term.title}</h1>
-        <p className="text-lg text-gray-600">{term.oneLiner}</p>
+        {one_liner && (
+          <p className="mb-3 text-lg text-gray-700">{one_liner}</p>
+        )}
 
-        {/* 메타 정보 */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
-            {term.category}
-          </span>
-          {term.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
+        {aliases && (
+          <div className="mb-2 text-sm text-gray-500">
+            <span className="font-medium">별칭:</span> {aliases}
+          </div>
+        )}
+
+        {publishedAt && (
+          <div className="text-sm text-gray-400">
+            발행일: {new Date(publishedAt).toLocaleDateString("ko-KR")}
+          </div>
+        )}
       </header>
 
       {/* 요약 */}
-      <section className="mb-6">
-        <h2 className="mb-2 text-lg font-semibold text-gray-800">요약</h2>
-        <div className="rounded-lg bg-gray-50 p-4 text-gray-700">
-          {term.summary}
-        </div>
-      </section>
-
-      {/* 본문 */}
-      <section className="mb-8">
-        <h2 className="mb-2 text-lg font-semibold text-gray-800">상세 설명</h2>
-        <div className="prose prose-gray max-w-none">
-          {/* TODO: Strapi 마크다운/리치텍스트 렌더링 */}
-          <p>{term.body}</p>
-        </div>
-      </section>
-
-      {/* 별칭 (있는 경우) */}
-      {term.aliases.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-2 text-lg font-semibold text-gray-800">
-            다른 표현 (별칭)
-          </h2>
-          <ul className="list-disc pl-5 text-gray-600">
-            {term.aliases.map((alias) => (
-              <li key={alias}>{alias}</li>
-            ))}
-          </ul>
+      {summary && (
+        <section className="mb-6 rounded-lg bg-blue-50 p-4">
+          <h2 className="mb-2 text-sm font-semibold text-blue-900">요약</h2>
+          <p className="text-sm text-blue-800">{summary}</p>
         </section>
       )}
 
-      {/* 수정일 */}
-      <footer className="border-t border-gray-200 pt-4 text-sm text-gray-400">
-        마지막 수정:{" "}
-        {new Date(term.updatedAt).toLocaleDateString("ko-KR", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
+      {/* 본문 (Markdown 렌더링) */}
+      {body && (
+        <section className="prose prose-slate max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              // 링크 새 탭에서 열기
+              a: ({ node, ...props }) => (
+                <a {...props} target="_blank" rel="noopener noreferrer" />
+              ),
+              // 헤딩 스타일
+              h1: ({ node, ...props }) => (
+                <h1 className="text-2xl font-bold text-gray-900" {...props} />
+              ),
+              h2: ({ node, ...props }) => (
+                <h2 className="mt-6 text-xl font-semibold text-gray-800" {...props} />
+              ),
+              h3: ({ node, ...props }) => (
+                <h3 className="mt-4 text-lg font-medium text-gray-800" {...props} />
+              ),
+              // 코드 블록
+              code: ({ node, className, children, ...props }) => {
+                const match = /language-(\w+)/.exec(className || "");
+                const isInline = !match;
+
+                if (isInline) {
+                  return (
+                    <code
+                      className="rounded bg-gray-100 px-1 py-0.5 text-sm text-gray-800"
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  );
+                }
+
+                return (
+                  <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4">
+                    <code className={`text-sm text-gray-100 ${className}`} {...props}>
+                      {children}
+                    </code>
+                  </pre>
+                );
+              },
+              // 인용구
+              blockquote: ({ node, ...props }) => (
+                <blockquote
+                  className="border-l-4 border-gray-300 pl-4 italic text-gray-600"
+                  {...props}
+                />
+              ),
+            }}
+          >
+            {body}
+          </ReactMarkdown>
+        </section>
+      )}
+
+      {!body && !summary && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-400">
+          본문이 작성되지 않았습니다.
+        </div>
+      )}
+
+      {/* 하단 네비게이션 */}
+      <footer className="mt-12 border-t border-gray-200 pt-6">
+        <a
+          href="/terms"
+          className="inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-700"
+        >
+          ← 용어 목록으로 돌아가기
+        </a>
       </footer>
-    </div>
+    </article>
   );
 }

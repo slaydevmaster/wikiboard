@@ -3,13 +3,24 @@
   "private": true,
   "description": "사전형 위키보드 플랫폼",
   "scripts": {
-    "dev:web": "dotenv -e .env -- npm -w apps/web run dev",
+    "dev:web": "dotenv -e .env -- node -e \"process.env.PORT=process.env.WEB_PORT||3050;require('child_process').execSync('npm -w apps/web run dev',{stdio:'inherit'})\"",
     "dev:cms": "dotenv -e .env -- npm -w apps/cms run develop",
     "build:web": "dotenv -e .env -- npm -w apps/web run build",
     "build:cms": "dotenv -e .env -- npm -w apps/cms run build",
     "lint": "npm -w apps/web run lint",
+    "db:push": "node scripts/db-create-tables.js",
+    "db:seed": "node scripts/db-cmd.js seed",
+    "db:studio": "node scripts/db-cmd.js studio",
     "docker:dev": "docker compose -f docker-compose.dev.yml up -d",
-    "docker:down": "docker compose -f docker-compose.dev.yml down"
+    "docker:down": "docker compose -f docker-compose.dev.yml down",
+    "verify": "node scripts/verify-all.js",
+    "verify:health": "node scripts/verify-health.js",
+    "verify:auth": "node scripts/verify-auth.js",
+    "verify:admin": "node scripts/verify-admin.js",
+    "verify:strapi": "node scripts/verify-strapi.js",
+    "verify:external": "node scripts/verify-external-api.js",
+    "cms:token": "node scripts/create-api-token.js",
+    "cms:reset-password": "node scripts/reset-admin-password.js"
   },
   "workspaces": [
     "apps/*",
@@ -19,6 +30,9 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "dotenv-cli": "^11.0.0"
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "dotenv-cli": "^11.0.0",
+    "mysql2": "^3.11.5"
   }
 }

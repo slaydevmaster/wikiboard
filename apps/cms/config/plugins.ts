@@ -2,6 +2,11 @@
 // Strapi에서 사용하는 플러그인의 활성화 여부와 옵션을 구성합니다.
 
 export default ({ env }) => ({
+  // Strapi Cloud 플러그인 비활성화 (유료 전환 광고 제거)
+  cloud: {
+    enabled: false,
+  },
+
   // 사용자 권한 플러그인
   "users-permissions": {
     config: {

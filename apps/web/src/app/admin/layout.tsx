@@ -2,12 +2,11 @@
  * 어드민 레이아웃
  * - /admin 하위 모든 페이지에 적용
  * - 좌측 사이드바 네비게이션 + 우측 콘텐츠 영역
- * - Auth.js 세션 확인 후 접근 제어 (추후 구현)
+ * - Auth.js 세션 확인 후 접근 제어
  */
 
-// TODO: Auth.js 세션 확인
-// import { auth } from "@/lib/auth";
-// import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 /** 어드민 사이드바 메뉴 항목 */
 const ADMIN_MENU = [
@@ -23,11 +22,11 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // TODO: 인증 확인 - 관리자만 접근 가능
-  // const session = await auth();
-  // if (!session || session.user.role !== "admin") {
-  //   redirect("/");
-  // }
+  // 인증 확인 - 관리자만 접근 가능
+  const session = await auth();
+  if (!session || session.user.role !== "admin") {
+    redirect("/login");
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-120px)]">

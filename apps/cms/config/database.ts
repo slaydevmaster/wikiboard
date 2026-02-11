@@ -30,7 +30,7 @@ const getDatabaseConnection = (dbType: string) => {
     case "mariadb":
     case "mysql":
       return {
-        client: "mysql2",
+        client: "mysql",
         connection: {
           host: process.env.DATABASE_HOST || "127.0.0.1",
           port: parseInt(process.env.DATABASE_PORT || "3306", 10),

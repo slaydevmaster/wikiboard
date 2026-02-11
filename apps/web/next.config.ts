@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Node.js 전용 패키지 — 클라이언트 번들에서 제외
+  serverExternalPackages: [
+    "mysql2",
+    "bcryptjs",
+    "drizzle-orm",
+  ],
+
   // 모노레포에서 shared 패키지 트랜스파일
   transpilePackages: ["@wikiboard/shared"],
 

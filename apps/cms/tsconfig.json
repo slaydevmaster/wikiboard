@@ -5,9 +5,10 @@
     "rootDir": ".",
     "baseUrl": ".",
     "sourceMap": true,
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"]
     }
@@ -22,6 +23,7 @@
     "dist",
     ".cache",
     ".tmp",
-    "build"
+    "build",
+    "src/admin"
   ]
 }

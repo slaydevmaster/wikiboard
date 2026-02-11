@@ -107,7 +107,7 @@ export async function getTerms(page = 1, pageSize = 25) {
       "filters[status][$eq]": "published",
       "populate": "*",
     },
-    revalidate: 60, // 60초마다 재검증
+    revalidate: 5, // 5초마다 재검증 (개발용)
   });
 }
 
@@ -124,7 +124,7 @@ export async function getTermBySlug(slug: string) {
       "filters[status][$eq]": "published",
       "populate": "*",
     },
-    revalidate: 60,
+    revalidate: 5, // 5초마다 재검증 (개발용)
   });
 }
 
@@ -138,6 +138,84 @@ export async function getCategories() {
       "populate": "*",
     },
     revalidate: 300, // 5분마다 재검증
+  });
+}
+
+/**
+ * 최근 등록 용어 조회
+ *
+ * @param limit - 조회할 용어 개수
+ * @returns 최근 등록 용어 목록
+ */
+export async function getRecentTerms(limit = 5) {
+  return strapiGet("/terms", {
+    params: {
+      "pagination[limit]": limit,
+      "sort[0]": "publishedAt:desc",
+      "filters[status][$eq]": "published",
+      "populate": "*",
+    },
+    revalidate: 5, // 5초마다 재검증 (개발용)
+  });
+}
+
+/**
+ * 초성/A-Z로 용어 필터링
+ *
+ * @param initial - 초성 또는 영문 첫 글자 (예: "ㄱ", "A")
+ * @param page - 페이지 번호
+ * @param pageSize - 페이지 크기
+ * @returns 필터링된 용어 목록
+ */
+export async function getTermsByInitial(
+  initial: string,
+  page = 1,
+  pageSize = 25
+) {
+  // 한글 초성 (ㄱ-ㅎ) 또는 영문 대문자 (A-Z) 여부 확인
+  const isKorean = /^[ㄱ-ㅎ]$/.test(initial);
+  const isEnglish = /^[A-Z]$/.test(initial);
+
+  if (!isKorean && !isEnglish) {
+    throw new Error("초성은 ㄱ-ㅎ 또는 A-Z만 가능합니다");
+  }
+
+  return strapiGet("/terms", {
+    params: {
+      "pagination[page]": page,
+      "pagination[pageSize]": pageSize,
+      "sort[0]": "title:asc",
+      "filters[status][$eq]": "published",
+      "filters[title][$startsWith]": initial,
+      "populate": "*",
+    },
+    revalidate: 5, // 5초마다 재검증 (개발용)
+  });
+}
+
+/**
+ * 카테고리별 용어 목록 조회
+ *
+ * @param categorySlug - 카테고리 slug
+ * @param page - 페이지 번호
+ * @param pageSize - 페이지 크기
+ * @returns 해당 카테고리의 용어 목록
+ */
+export async function getTermsByCategory(
+  categorySlug: string,
+  page = 1,
+  pageSize = 25
+) {
+  return strapiGet("/terms", {
+    params: {
+      "pagination[page]": page,
+      "pagination[pageSize]": pageSize,
+      "sort[0]": "title:asc",
+      "filters[status][$eq]": "published",
+      "filters[category][slug][$eq]": categorySlug,
+      "populate": "*",
+    },
+    revalidate: 5, // 5초마다 재검증 (개발용)
   });
 }
 
